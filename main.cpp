@@ -1,4 +1,4 @@
-#include <iostream>//zostaly jeszcze bilanse z dwoch okresow
+#include <iostream>//trzeba ogarnac temat z "void rozdzielDateNaZmienne(string dateWithDashes);" gdzie rok czy miesiac jest jako int w naszym projekcie
 #include <windows.h>
 #include <winbase.h>
 #include <time.h>
@@ -21,17 +21,20 @@ public:
     float amount;
 };
 
+int rok, miesiac, dzien;
+
 Wydatki wydatkiC;
 vector <Wydatki> wydatkiV;
 
 ////////////////Daty (w tym struktury tm)//////////////////////////////////////////////////////////
-string zwrocAktualnaDate();
-string zwrocPoczatekMiesiaca();
-string zwrocPoczatekPoprzedniegoMiesiaca();
+string zwrocAktualnaDateTM();
+string zwrocPoczatekMiesiacaTM();
+string zwrocPoczatekPoprzedniegoMiesiacaTM();
 bool czyRokJestPrzestepny(int rok);
 int podajMaksymalnaIloscDniWMiesiacu(int miesiac, int rok);
 int podajPoczatekKolejnegoMiesiaca(string poczatkowaData);//tu juz tez wszystklo dziala
 int podajKoniecKolejnegoMiesiaca(string koniecMiesiaca);
+
 ///////////////////////Drugi sposob (z wykorzystaniem struktury tm)//////////////////////////////////////////////////////////////////////
 int zwrocPoczatekNastepnegoMiesiacaTM(string poczatkowaDataString);
 int zwrocKoniecNastepnegoMiesiacaTM(string koniecMiesiaca);
@@ -48,8 +51,11 @@ void bilansZDwochDat();
 
 ////////////////Pomicnicze//////////////////////////////////////////////////////////
 string replaceDateToTextWithoutDashes(string dateWithDashes);
+void rozdzielDateNaZmienne(string dateWithDashes);
 int convertStringToInt(string stringNumber);
 string convertIntToString(int intNumber);
+string dwucyfrowyMiesiac(int miesiac);
+
 
 
 
@@ -78,8 +84,7 @@ int main(){
 }
 
 ////////////////Daty (w tym struktury tm)//////////////////////////////////////////////////////////
-string zwrocAktualnaDate(){
-    string czasString;
+string zwrocAktualnaDateTM(){
 
     char bufor[64];
     time_t czas;
@@ -87,14 +92,12 @@ string zwrocAktualnaDate(){
     tm czasTM = *localtime(&czas);
 
     strftime(bufor, sizeof(bufor), "%Y%m%d", &czasTM);
-    czasString = bufor;
 
     //cout<<"zwrocAktualnaDate: "<<czasString<<endl;
-    return czasString; //np. "20230122"
+    return bufor; //np. "20230122"
 }
 
-string zwrocPoczatekMiesiaca(){
-    string czasString;
+string zwrocPoczatekMiesiacaTM(){
 
     char bufor[64];
     time_t czas;
@@ -104,14 +107,12 @@ string zwrocPoczatekMiesiaca(){
     czasTM.tm_mday = 1;
 
     strftime(bufor, sizeof(bufor), "%Y%m%d", &czasTM);
-    czasString = bufor;
 
     //cout<<"zwrocPoczatekMiesiaca: "<<czasString<<endl;
-    return czasString;
+    return bufor;
 }
 
-string zwrocPoczatekPoprzedniegoMiesiaca(){
-    string czasString;
+string zwrocPoczatekPoprzedniegoMiesiacaTM(){
 
     char bufor[64];
     time_t czas;
@@ -129,15 +130,14 @@ string zwrocPoczatekPoprzedniegoMiesiaca(){
     }
 
     strftime(bufor, sizeof(bufor), "%Y%m%d", &czasTM);
-    czasString = bufor;
 
     //cout<<"zwrocPoczatekPoprzedniegoMiesiaca: "<<czasString<<endl;
-    return czasString;
+    return bufor;
 }
 
 int podajMaksymalnaIloscDniWMiesiacu(int miesiac, int rok){
     int luty=2, lipiec=7;
-    bool rokPrzestepny= czyRokJestPrzestepny(rok);
+    bool rokPrzestepny = czyRokJestPrzestepny(rok);
 
 	if (miesiac == luty)
 		return rokPrzestepny ? 29 : 28;
@@ -233,8 +233,8 @@ void pokazPojedynczyWydatek(Wydatki wydatkiC){
 void bilansZBiezacegoMiesiaca(){
     int poczatkowaData, koncowaData;
 
-    poczatkowaData = convertStringToInt(zwrocPoczatekMiesiaca());//"20230101"
-    koncowaData = convertStringToInt(zwrocAktualnaDate());//np. "20230122"
+    poczatkowaData = convertStringToInt(zwrocPoczatekMiesiacaTM());//"20230101"
+    koncowaData = convertStringToInt(zwrocAktualnaDateTM());//np. "20230122"
 
     cout<<endl<<"ID    Date         amount"<<endl;
 
@@ -248,23 +248,23 @@ void bilansZBiezacegoMiesiaca(){
 }
 
 void bilansZPoprzedniegoMiesiaca(){
-    int poczatekMiesiaca, koniecMiesiada, maksymalnaIloscDniWMiesiacu;
+    int poczatekMiesiaca, koniecMiesiaca, maksymalnaIloscDniWMiesiacu;
     string tymczasowaData, miesiac, rok;
 
-    poczatekMiesiaca = convertStringToInt(zwrocPoczatekPoprzedniegoMiesiaca());//20221201
-    tymczasowaData = zwrocPoczatekPoprzedniegoMiesiaca();//np. 20221201
+    poczatekMiesiaca = convertStringToInt(zwrocPoczatekPoprzedniegoMiesiacaTM());//20221201
+    tymczasowaData = zwrocPoczatekPoprzedniegoMiesiacaTM();//np. 20221201
 
     rok = tymczasowaData.substr(0,4);                    //2022
     miesiac = tymczasowaData.substr(4,2);                //12
 
     maksymalnaIloscDniWMiesiacu = podajMaksymalnaIloscDniWMiesiacu(convertStringToInt(miesiac), convertStringToInt(rok));//31
     tymczasowaData = rok + miesiac + convertIntToString(maksymalnaIloscDniWMiesiacu);//20221231
-    koniecMiesiada = convertStringToInt(tymczasowaData);//20221231
+    koniecMiesiaca = convertStringToInt(tymczasowaData);//20221231
 
     cout<<endl<<"ID    Date         amount"<<endl;
 
     for (vector <Wydatki> :: iterator itr = wydatkiV.begin(); itr != wydatkiV.end(); itr++){
-        for(int i=poczatekMiesiaca; i<=koniecMiesiada; i++){
+        for(int i=poczatekMiesiaca; i<=koniecMiesiaca; i++){
             if(itr -> date == i){
                 pokazPojedynczyWydatek(*itr);
             }
@@ -315,8 +315,8 @@ int podajPoczatekKolejnegoMiesiaca(string poczatkowaData){
     miesiac = poczatkowaData.substr(4,2);
 
     if (miesiac != "12"){ //ten sam rok
-        nastepnyMiesiac = convertIntToString(convertStringToInt(miesiac) + 1);//tutaj musimy ogarnac temat kiedy to "int" niszczy nam zero przed pojedyncza cyfra
-        nastepnyMiesiac.length()==1 ? nastepnyMiesiac = "0" + nastepnyMiesiac : nastepnyMiesiac;
+        nastepnyMiesiac = convertIntToString(convertStringToInt(miesiac) + 1);//tutaj ogarniamy temat kiedy to "int" niszczy
+        nastepnyMiesiac.length()==1 ? nastepnyMiesiac = "0" + nastepnyMiesiac : nastepnyMiesiac;//nam zero przed pojedyncza cyfra
         poczatkowaData = rok + nastepnyMiesiac + "01";
     }else{ //kolejny rok
         nastepnyRok = convertIntToString(convertStringToInt(rok) + 1);
@@ -339,8 +339,6 @@ int podajKoniecKolejnegoMiesiaca(string koniecMiesiaca){
 }
 ///////////////////////Drugi sposob//////////////////////////////////////////////////////////////////////
 int zwrocPoczatekNastepnegoMiesiacaTM(string poczatkowaDataString){//tutaj sprawdzamy czy szybciej/latwiej bedzie za pomoca struktury tm
-    string czasString;
-
     char bufor[64];
     time_t czas;
     time(&czas);
@@ -359,13 +357,12 @@ int zwrocPoczatekNastepnegoMiesiacaTM(string poczatkowaDataString){//tutaj spraw
     czasTM.tm_mday = 1;
 
     strftime(bufor, sizeof(bufor), "%Y%m%d", &czasTM);
-    czasString = bufor;
 
-    return convertStringToInt(czasString);
+    return convertStringToInt(bufor);
 }
 
 int zwrocKoniecNastepnegoMiesiacaTM(string koniecMiesiaca){
-    string czasString, rok, miesiac;
+    string rok, miesiac;
 
     char bufor[64];
     time_t czas;
@@ -380,9 +377,8 @@ int zwrocKoniecNastepnegoMiesiacaTM(string koniecMiesiaca){
     czasTM.tm_year = convertStringToInt(koniecMiesiaca.substr(0,4)) - 1900;
 
     strftime(bufor, sizeof(bufor), "%Y%m%d", &czasTM);
-    czasString = bufor;
 
-    return convertStringToInt(czasString);
+    return convertStringToInt(bufor);
 }
 
 
@@ -394,6 +390,31 @@ string replaceDateToTextWithoutDashes(string dateWithDashes){
             dateWithoutDashes+=dateWithDashes[charPosition];
         }
     return dateWithoutDashes;
+}
+
+void rozdzielDateNaZmienne(string dateWithDashes){
+    string dateElement = "";//"elementDaty"
+    int dateElementNumber = 1;//"numerElementuDaty"
+
+    dateWithDashes=dateWithDashes+'-';//dodajemy na koncu dodatkowa kreske do daty, aby petla nizej dzialala bez modyfikacji
+
+    for (int charPosition=0; charPosition<(int)dateWithDashes.length(); charPosition++)
+    {
+        if(dateWithDashes[charPosition]!='-'){
+            dateElement+=dateWithDashes[charPosition];
+        }else{
+            switch(dateElementNumber){
+                case 1:
+                    rok = atoi(dateElement.c_str());       break;
+                case 2:
+                    miesiac = atoi(dateElement.c_str());      break;
+                case 3:
+                    dzien = atoi(dateElement.c_str());        break;
+            }
+        dateElement = "";
+        dateElementNumber++;
+        }
+    }
 }
 
 int convertStringToInt(string stringNumber){
@@ -412,6 +433,11 @@ string convertIntToString(int intNumber){
     return stringNumber;
 }
 
+string dwucyfrowyMiesiac(int miesiac)
+{
+    string miesiacString = convertIntToString(miesiac);
+    miesiacString.length()==1 ? miesiacString = "0" + miesiacString : miesiacString;
+}
 
 
 
