@@ -60,7 +60,7 @@ int main(){
     cout<<"Przed posortowaniem:"<<endl;
     pokazWszystkieWydatki();
 
-    //sort(wydatkiV.begin(), wydatkiV.end(), mniejsze);///trzeci parametr bez zadnych nawiasow
+    //sort(wydatkiV.begin(), wydatkiV.end(), mniejsze);//sortowanie bec innych odrebnych klas
     sort(wydatkiV.begin(), wydatkiV.end( ), [ ](Wydatki a, Wydatki b)  {return a.date < b.date;} ); ///wyrazenie lambda
 
 
@@ -231,15 +231,15 @@ void pokazPojedynczyWydatek(Wydatki wydatkiC){
 
 ////////////////Bilanse//////////////////////////////////////////////////////////
 void bilansZBiezacegoMiesiaca(){
-    int poczatkowaDataInt, koncowaDataInt;
+    int poczatkowaData, koncowaData;
 
-    poczatkowaDataInt = convertStringToInt(zwrocPoczatekMiesiaca());//"20230101"
-    koncowaDataInt = convertStringToInt(zwrocAktualnaDate());//np. "20230122"
+    poczatkowaData = convertStringToInt(zwrocPoczatekMiesiaca());//"20230101"
+    koncowaData = convertStringToInt(zwrocAktualnaDate());//np. "20230122"
 
     cout<<endl<<"ID    Date         amount"<<endl;
 
     for (vector <Wydatki> :: iterator itr = wydatkiV.begin(); itr != wydatkiV.end(); itr++){
-        for(int i=poczatkowaDataInt; i<=koncowaDataInt; i++){
+        for(int i=poczatkowaData; i<=koncowaData; i++){
             if(itr -> date == i){
                 pokazPojedynczyWydatek(*itr);
             }
@@ -248,24 +248,23 @@ void bilansZBiezacegoMiesiaca(){
 }
 
 void bilansZPoprzedniegoMiesiaca(){
-    int poczatkowaDataInt, koncowaDataInt, maksymalnaIloscDniWMiesiacu;
-    string poczatkowaDataString, koncowaDataString;
-    string miesiac, rok;
+    int poczatekMiesiaca, koniecMiesiada, maksymalnaIloscDniWMiesiacu;
+    string tymczasowaData, miesiac, rok;
 
-    poczatkowaDataString = koncowaDataString = zwrocPoczatekPoprzedniegoMiesiaca();//np. 20221201
-    poczatkowaDataInt = convertStringToInt(poczatkowaDataString);//20221201
+    poczatekMiesiaca = convertStringToInt(zwrocPoczatekPoprzedniegoMiesiaca());//20221201
+    tymczasowaData = zwrocPoczatekPoprzedniegoMiesiaca();//np. 20221201
 
-    rok = koncowaDataString.substr(0,4);                    //2022
-    miesiac = koncowaDataString.substr(4,2);                //12
+    rok = tymczasowaData.substr(0,4);                    //2022
+    miesiac = tymczasowaData.substr(4,2);                //12
 
     maksymalnaIloscDniWMiesiacu = podajMaksymalnaIloscDniWMiesiacu(convertStringToInt(miesiac), convertStringToInt(rok));//31
-    koncowaDataString = rok + miesiac + convertIntToString(maksymalnaIloscDniWMiesiacu);//20221231
-    koncowaDataInt = convertStringToInt(koncowaDataString);//20221231
+    tymczasowaData = rok + miesiac + convertIntToString(maksymalnaIloscDniWMiesiacu);//20221231
+    koniecMiesiada = convertStringToInt(tymczasowaData);//20221231
 
     cout<<endl<<"ID    Date         amount"<<endl;
 
     for (vector <Wydatki> :: iterator itr = wydatkiV.begin(); itr != wydatkiV.end(); itr++){
-        for(int i=poczatkowaDataInt; i<=koncowaDataInt; i++){
+        for(int i=poczatekMiesiaca; i<=koniecMiesiada; i++){
             if(itr -> date == i){
                 pokazPojedynczyWydatek(*itr);
             }
@@ -273,39 +272,37 @@ void bilansZPoprzedniegoMiesiaca(){
     }
 }
 
-void bilansZDwochDat(){////bilans dziala dobrze, trzbe ao jakos ladniej uporzadkowac, byc moze zastanowic sie nad tym wyrazeniem trojargumentowym (dwa razy jest)
-    int poczatkowaDataInt, koncowaDataInt, koniecMiesiacaInt, maksymalnaIloscDniWMiesiacu, koniecPrzedzialu;
-    string poczatkowaDataString ="2021-02-15", koncowaDataString ="2022-12-20", koniecMiesiacaString;
-    string miesiac, rok;//mozna sprobowac zamienic wszystko na int (modulo, dzielenie etc)
+void bilansZDwochDat(){
+    int poczatkowaData, koncowaData, koniecMiesiaca, maksymalnaIloscDniWMiesiacu, koniecPrzedzialu;
+    string wpisanaDataPierwsza ="2021-02-15", wpisanaDataDruga = "2022-12-20", miesiac, rok;
 
     //tutaj musimy jeszcze sprawdzic poprawnosc obu dat
 
-    poczatkowaDataString = replaceDateToTextWithoutDashes(poczatkowaDataString);//"20210215"
-    koncowaDataString = replaceDateToTextWithoutDashes(koncowaDataString);//"20221230"
+    wpisanaDataPierwsza = replaceDateToTextWithoutDashes(wpisanaDataPierwsza);//"20210215"
+    wpisanaDataDruga = replaceDateToTextWithoutDashes(wpisanaDataDruga);//"20221220"
 
-    rok = poczatkowaDataString.substr(0,4);                    //2021       tutaj dzielimy
-    miesiac = poczatkowaDataString.substr(4,2);                //02         tutaj dzielimy i modulo
+    rok = wpisanaDataPierwsza.substr(0,4);                    //2021
+    miesiac = wpisanaDataPierwsza.substr(4,2);                //02
 
     maksymalnaIloscDniWMiesiacu = podajMaksymalnaIloscDniWMiesiacu(convertStringToInt(miesiac), convertStringToInt(rok));//28
-    koniecMiesiacaString = rok + miesiac + convertIntToString(maksymalnaIloscDniWMiesiacu);//"20210228"     tutaj modulo i dodajemy cyfre (podajMaksymalnaIloscDniWMiesiacu) o jeden mniejsza
 
-    poczatkowaDataInt = convertStringToInt(poczatkowaDataString);//"20210215"
-    koncowaDataInt = convertStringToInt(koncowaDataString);//"20221230"
-    koniecMiesiacaInt = convertStringToInt(koniecMiesiacaString);//"20210228"
+    poczatkowaData = convertStringToInt(wpisanaDataPierwsza);//"20210215"
+    koncowaData = convertStringToInt(wpisanaDataDruga);//"20221220"
+    koniecMiesiaca = convertStringToInt(rok + miesiac + convertIntToString(maksymalnaIloscDniWMiesiacu));//"20210228"
 
-    koncowaDataInt >= koniecMiesiacaInt ? koniecPrzedzialu = koniecMiesiacaInt : koniecPrzedzialu = koncowaDataInt;
+    koncowaData >= koniecMiesiaca ? koniecPrzedzialu = koniecMiesiaca : koniecPrzedzialu = koncowaData;
 
     cout<<endl<<"ID    Date         amount"<<endl;
 
     for (vector <Wydatki> :: iterator itr = wydatkiV.begin(); itr != wydatkiV.end(); itr++){
-        for(int i=poczatkowaDataInt; i<=koniecPrzedzialu; i++){
+        for(int i=poczatkowaData; i<=koniecPrzedzialu; i++){
             if(itr -> date == i){
                 pokazPojedynczyWydatek(*itr);
             }
-            if(i==koniecMiesiacaInt){
-                poczatkowaDataInt = zwrocPoczatekNastepnegoMiesiacaTM(convertIntToString(poczatkowaDataInt));
-                koniecMiesiacaInt = zwrocKoniecNastepnegoMiesiacaTM(convertIntToString(poczatkowaDataInt));
-                koncowaDataInt >= koniecMiesiacaInt ? koniecPrzedzialu = koniecMiesiacaInt : koniecPrzedzialu = koncowaDataInt;
+            if(i==koniecMiesiaca){
+                poczatkowaData = zwrocPoczatekNastepnegoMiesiacaTM(convertIntToString(poczatkowaData));
+                koniecMiesiaca = zwrocKoniecNastepnegoMiesiacaTM(convertIntToString(poczatkowaData));
+                koncowaData >= koniecMiesiaca ? koniecPrzedzialu = koniecMiesiaca : koniecPrzedzialu = koncowaData;
             }
         }
     }
@@ -342,7 +339,7 @@ int podajKoniecKolejnegoMiesiaca(string koniecMiesiaca){
 }
 ///////////////////////Drugi sposob//////////////////////////////////////////////////////////////////////
 int zwrocPoczatekNastepnegoMiesiacaTM(string poczatkowaDataString){//tutaj sprawdzamy czy szybciej/latwiej bedzie za pomoca struktury tm
-    string czasString;    //odp. mozna tak i tak, tutaj trzymamy sie dalej struktury tm, ale trzeba ja skrocic (dac czesc w osobna funkcje i zwracac sama strukture)
+    string czasString;
 
     char bufor[64];
     time_t czas;
@@ -369,19 +366,16 @@ int zwrocPoczatekNastepnegoMiesiacaTM(string poczatkowaDataString){//tutaj spraw
 
 int zwrocKoniecNastepnegoMiesiacaTM(string koniecMiesiaca){
     string czasString, rok, miesiac;
-    int maksymalnaIloscDniWMiesiacu;
 
     char bufor[64];
     time_t czas;
     time(&czas);
     tm czasTM;
 
-    rok = koniecMiesiaca.substr(0,4);//tu tez chyba da sie intami zrobic wszystko
+    rok = koniecMiesiaca.substr(0,4);
     miesiac = koniecMiesiaca.substr(4,2);
 
-    maksymalnaIloscDniWMiesiacu = podajMaksymalnaIloscDniWMiesiacu(convertStringToInt(miesiac), convertStringToInt(rok));
-
-    czasTM.tm_mday = maksymalnaIloscDniWMiesiacu;
+    czasTM.tm_mday = podajMaksymalnaIloscDniWMiesiacu(convertStringToInt(miesiac), convertStringToInt(rok));;
     czasTM.tm_mon = convertStringToInt(koniecMiesiaca.substr(4,2)) - 1;
     czasTM.tm_year = convertStringToInt(koniecMiesiaca.substr(0,4)) - 1900;
 
